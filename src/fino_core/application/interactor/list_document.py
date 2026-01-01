@@ -16,5 +16,5 @@ class ListDocumentUseCase:
 
         stored_documents = self.document_repository.list(input.criteria)
         return ListDocumentOutput(
-            available_documents=available_documents, stored_documents=stored_documents
+            available_document_list=available_documents, stored_document_list=stored_documents
         )
