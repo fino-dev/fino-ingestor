@@ -1,0 +1,91 @@
+---
+alwaysApply: true
+---
+
+# design.mdc
+
+# fino_core – Project Design Rules
+
+## 1. Project Identity
+
+fino_core is a **core financial data engine library**.
+
+target is **enginner and personal invester**
+
+fino_core will engage t financial data management and make the workflow creation smooth
+
+# User Story
+
+- 金融データを分析したい
+- そのためのフローを自動化して直感的に収集したい
+
+# Features ( Bounded Context)
+
+## Fino Core Collector
+
+- データの収集・保管プロセスの自動化を行う。
+
+- ### Domain
+  - **Model**
+    - **Document** (Entity)
+      - document_id (VO)
+      - filing_name
+      - ticker (VO)
+      - dicsclosure_type (VO)
+      - disclosure_source (VO)
+      - disclosure_date (VO)
+      - filing_format (VO)
+      - Disclosure Source (VO)
+  - **Repository**
+    - **DocumentRepository**
+- ### Application
+  - **usecase**
+    - list_document
+      - 開示ソースから取得可能で条件に一致するドキュメントを参照できるように確認する
+    - collect_document
+      - ドキュメントをダウンロードして指定先のストレージに適切に保存する
+      - 重複保存から保護するためにストレージから存在チェックを行う
+  - **InputModel**
+    - port を使用
+  - **OutputModel**
+    - port を使用
+- ### Interface / Port
+  - **Controller**
+    - list_document
+    - collect_document
+  - **Port**
+    - UseCase が外部に「期待する能力」を定義
+    - **Document Search Criteria** (VO)
+      - Infra の Disclosure Source に対して条件を抽象的に定義する
+      - document_source
+      - timescope
+      - ticker
+    - **DocumentStorage**
+      - Infra の RepositoryImplee が実際の Storage の詳細を知らないための IF
+- ### Infrastructure
+  - **repository**
+    - **DocumentRepositoryImpl**
+  - **Adopter**
+    - **EdinetDisclosureSourceAdapter** (with criteria)
+    - **TDnetDisclosureSourceAdapter** (with criteria)
+    - **S3StorageAdapter**
+    - **LocalStorageAdaper**
+
+### Storage Save Requirements
+
+- document will store into storage this process
+- user が分析以外にも確認できるようにする
+- 冪等性を維持し、重複保存から保護する
+
+- ### Document
+  - パーティション：検索時や、アクセス時のクエリに応じたグルーピングを行う
+  - ファイル名：参照時の識別子・
+  - **Partition**: <market>/<ticker>/<disclosure_type>/
+    - market (市場の国別)
+    - ticker (企業 ID)
+    - disclosure_type (開示書類の種別)
+  - **File Name**: <disclosure_source>-<document_id>-<disclosure_date（開示日）>-<format_type>
+    - disclosure_source (開示ソース)
+    - document_id (書類 ID)
+    - disclosure_date（開示日）
+    - format_type (書類形式)
