@@ -6,3 +6,6 @@ from fino_core.domain.value.document_search_criteria import DocumentSearchCriter
 @dataclass(frozen=True, slots=True)
 class CollectDocumentInput:
     criteria: DocumentSearchCriteria
+
+
+test
