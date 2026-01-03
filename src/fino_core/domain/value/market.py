@@ -4,16 +4,24 @@ from enum import Enum
 from fino_core.domain.model import ValueObject
 
 
-class FormatTypeEnum(Enum):
-    CSV = "csv"
-    XBRL = "xbrl"
-    PDF = "pdf"
-    OTHER = "other"
+class MarketEnum(Enum):
+    JP = "JP"
+    US = "US"
+    UK = "UK"
+    DE = "DE"
+    FR = "FR"
+    IT = "IT"
+    ES = "ES"
+    CA = "CA"
+    AU = "AU"
+    NZ = "NZ"
+    SG = "SG"
+    HK = "HK"
 
 
 @dataclass(frozen=True, slots=True)
-class FormatType(ValueObject):
-    enum: FormatTypeEnum
+class Market(ValueObject):
+    enum: MarketEnum
 
     @property
     def value(self) -> str:
@@ -25,4 +33,4 @@ class FormatType(ValueObject):
 
     def _validate(self) -> None:
         if not self.value:
-            raise ValueError("Format type cannot be empty")
+            raise ValueError("Market cannot be empty")

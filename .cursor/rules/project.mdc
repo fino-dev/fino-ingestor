@@ -2,30 +2,26 @@
 alwaysApply: true
 ---
 
-# design.mdc
+# design.mdc - fino_core –
 
-# fino_core – Project Design Rules
+## Project Design Rules
 
-## 1. Project Identity
+- fino_core is a **core financial data engine library**.
+- target is **enginner and personal invester**
+- fino_core will engage financial data engenniering and make the workflow creation smooth
 
-fino_core is a **core financial data engine library**.
+## Usecase Stories
 
-target is **enginner and personal invester**
+- Who Want to Analyze Financial Data
+- And Who want to automate those proccesses
 
-fino_core will engage t financial data management and make the workflow creation smooth
+## Features ( Bounded Context)
 
-# User Story
-
-- 金融データを分析したい
-- そのためのフローを自動化して直感的に収集したい
-
-# Features ( Bounded Context)
-
-## Fino Core Collector
+### === Collector ===
 
 - データの収集・保管プロセスの自動化を行う。
 
-- ### Domain
+- #### Domain
   - **Model**
     - **Document** (Entity)
       - document_id (VO)
@@ -38,7 +34,7 @@ fino_core will engage t financial data management and make the workflow creation
       - Disclosure Source (VO)
   - **Repository**
     - **DocumentRepository**
-- ### Application
+- #### Application
   - **usecase**
     - list_document
       - 開示ソースから取得可能で条件に一致するドキュメントを参照できるように確認する
@@ -49,7 +45,7 @@ fino_core will engage t financial data management and make the workflow creation
     - port を使用
   - **OutputModel**
     - port を使用
-- ### Interface / Port
+- #### Interface / Port
   - **Controller**
     - list_document
     - collect_document
@@ -62,7 +58,7 @@ fino_core will engage t financial data management and make the workflow creation
       - ticker
     - **DocumentStorage**
       - Infra の RepositoryImplee が実際の Storage の詳細を知らないための IF
-- ### Infrastructure
+- #### Infrastructure
   - **repository**
     - **DocumentRepositoryImpl**
   - **Adopter**
@@ -71,21 +67,31 @@ fino_core will engage t financial data management and make the workflow creation
     - **S3StorageAdapter**
     - **LocalStorageAdaper**
 
-### Storage Save Requirements
+## Storage Rules
 
 - document will store into storage this process
 - user が分析以外にも確認できるようにする
 - 冪等性を維持し、重複保存から保護する
 
-- ### Document
-  - パーティション：検索時や、アクセス時のクエリに応じたグルーピングを行う
-  - ファイル名：参照時の識別子・
-  - **Partition**: <market>/<ticker>/<disclosure_type>/
-    - market (市場の国別)
-    - ticker (企業 ID)
-    - disclosure_type (開示書類の種別)
-  - **File Name**: <disclosure_source>-<document_id>-<disclosure_date（開示日）>-<format_type>
-    - disclosure_source (開示ソース)
-    - document_id (書類 ID)
-    - disclosure_date（開示日）
-    - format_type (書類形式)
+### ===Document===
+
+- パーティション：検索時や、アクセス時のクエリに応じたグルーピングを行う
+- ファイル名：参照時の識別子
+- **Partition**:
+  1. market (市場の国別)
+  2. ticker (企業 ID)
+  3. disclosure_type (開示書類の種別)
+- **File Name**:
+  1. document_id (書類 ID)
+  2. disclosure_date（開示日）
+  3. format_type (ファイルフォーマット)
+
+#### EXAMPLE
+
+---
+
+```
+s3://finance-storage-bucket.com/disclosures/JP/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_xbrl.zip
+
+/Users/hogehoge/data/disclosure/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_csv.zip
+```

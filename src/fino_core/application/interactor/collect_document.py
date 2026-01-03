@@ -2,25 +2,21 @@ from fino_core.application.input.collect_document import CollectDocumentInput
 from fino_core.application.output.collect_document import CollectDocumentOutput
 from fino_core.domain.entity.document import Document
 from fino_core.domain.repository.document import DocumentRepository
-from fino_core.interface.port.disclosure_source import DisclosureSourcePort
 
 
 class CollectDocumentUseCase:
-    def __init__(
-        self, disclosure_source: DisclosureSourcePort, document_repository: DocumentRepository
-    ) -> None:
-        self.disclosure_source = disclosure_source
+    def __init__(self, document_repository: DocumentRepository) -> None:
         self.document_repository = document_repository
 
     def execute(self, input: CollectDocumentInput) -> CollectDocumentOutput:
-        available_document_list = self.disclosure_source.list_available_documents(input.criteria)
+        available_document_list = input.disclosure_source.list_available_documents(input.criteria)
 
         stored_document_list = self.document_repository.list(input.criteria)
 
         collected_documents: list[Document] = []
         for available_document in available_document_list:
             if available_document not in stored_document_list:
-                file = self.disclosure_source.download_document(available_document.document_id)
+                file = input.disclosure_source.download_document(available_document.document_id)
                 self.document_repository.save(available_document, file)
                 collected_documents.append(available_document)
 

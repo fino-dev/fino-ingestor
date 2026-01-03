@@ -3,6 +3,15 @@ from enum import Enum
 
 from fino_core.domain.model import ValueObject
 
+# class HogeEnum(Enum):
+#     A = "a"
+#     B = "b"
+#     C = "c"
+# print(HogeEnum.A)
+# print(HogeEnum.A.name, ": ", type(HogeEnum.A.name))
+# print(HogeEnum.A.value, ": ", type(HogeEnum.A.value))
+# print(HogeEnum)
+
 
 class DisclosureTypeEnum(Enum):
     """開示書類の種類"""
@@ -31,16 +40,35 @@ class DisclosureTypeEnum(Enum):
 
 @dataclass(frozen=True, slots=True)
 class DisclosureType(ValueObject):
-    enum: DisclosureTypeEnum
+    _enum: DisclosureTypeEnum
 
     @property
     def value(self) -> str:
-        return self.enum.value
+        return self._enum.value
 
     @property
     def name(self) -> str:
-        return self.enum.name
+        return self._enum.name
+
+    @property
+    def enum(self) -> DisclosureTypeEnum:
+        return self._enum
+
+    # def __str__(self) -> str:
+    #     return self._enum.value
+
+    # def __repr__(self) -> str:
+    #     return f"DisclosureType('{self._enum.value}')"
 
     def _validate(self) -> None:
         if not self.value:
             raise ValueError("Disclosure type cannot be empty")
+
+
+en = DisclosureType(_enum=DisclosureTypeEnum.ANNUAL_REPORT)
+
+print(en)
+print(repr(en))
+print(en.enum)
+print(en.value)
+print(en.name)
