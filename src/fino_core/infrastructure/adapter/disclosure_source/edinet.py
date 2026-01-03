@@ -6,7 +6,6 @@ from edinet import Edinet
 from edinet.enums.response import GetDocumentDocs
 
 from fino_core.domain.entity.document import Document
-from fino_core.domain.repository.document import DocumentSearchCriteria
 from fino_core.domain.value.disclosure_date import DisclosureDate
 from fino_core.domain.value.disclosure_type import DisclosureType, DisclosureTypeEnum
 from fino_core.domain.value.document_id import DocumentId
@@ -29,18 +28,12 @@ class EdinetAdapter:
         self.client = Edinet(token=config.api_key)
 
     def list_available_documents(
-        self, criteria: DocumentSearchCriteria
+        self, criteria: EdinetDocumentSearchCriteria
     ) -> list[Document]:
-        if not isinstance(criteria, EdinetDocumentSearchCriteria):
-            raise TypeError(
-                f"Expected EdinetDocumentSearchCriteria, got {type(criteria).__name__}"
-            )
-
-        edinet_criteria: EdinetDocumentSearchCriteria = criteria
         documents: list[Document] = []
 
         # EDINET APIの仕様に従い日付単位で一覧を取得していく
-        for target_date in edinet_criteria.timescope.iterate_by_day():
+        for target_date in criteria.timescope.iterate_by_day():
             target_datetime = datetime.combine(target_date, time.min)
 
             # 書類一覧取得APIを呼び出し、書類一覧を取得する
@@ -52,9 +45,7 @@ class EdinetAdapter:
 
             # EDINETの書類データをアプリ形式に変換していく
             for target_document in target_document_list:
-                document = self._convert_to_document(
-                    target_document, edinet_criteria.market
-                )
+                document = self._convert_to_document(target_document, criteria.market)
                 if document:
                     documents.append(document)
 

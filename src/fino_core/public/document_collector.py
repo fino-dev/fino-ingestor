@@ -1,11 +1,10 @@
-from typing import Literal, Optional, cast
+from typing import Literal, Optional
 
 from fino_core.application.input.collect_document import CollectDocumentInput
 from fino_core.application.input.list_document import ListDocumentInput
 from fino_core.application.interactor.collect_document import CollectDocumentUseCase
 from fino_core.application.interactor.list_document import ListDocumentUseCase
 from fino_core.domain.entity.document import Document
-from fino_core.domain.repository.document import DocumentSearchCriteria
 from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
 from fino_core.domain.value.market import Market, MarketEnum
 from fino_core.infrastructure.adapter.disclosure_source.edinet import (
@@ -45,12 +44,11 @@ class DocumentCollector:
 
         usecase = ListDocumentUseCase(self._document_repository)
 
-        edinet_criteria = EdinetDocumentSearchCriteria(
+        criteria = EdinetDocumentSearchCriteria(
             market=Market(enum=MarketEnum.JP),
             format_type=FormatType(enum=format_type),
             timescope=timescope,
         )
-        criteria = cast(DocumentSearchCriteria, edinet_criteria)
         input = ListDocumentInput(
             disclosure_source=self._disclosure_source, criteria=criteria
         )
@@ -62,7 +60,7 @@ class DocumentCollector:
         }
 
     def collect_document(
-        self, criteria: DocumentSearchCriteria
+        self, criteria: EdinetDocumentSearchCriteria
     ) -> dict[Literal["collected_document_list"], list[Document]]:
         usecase = CollectDocumentUseCase(self._document_repository)
 
