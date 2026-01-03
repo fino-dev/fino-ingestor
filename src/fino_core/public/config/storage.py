@@ -1,11 +1,11 @@
 from pydantic import BaseModel, field_validator
 
 
-class LocalConfig(BaseModel):
-    absolute_path: str
+class LocalStorageConfig(BaseModel):
+    base_dir: str
 
 
-class S3Config(BaseModel):
+class S3StorageConfig(BaseModel):
     bucket_name: str
     region: str
     prefix: str | None = None

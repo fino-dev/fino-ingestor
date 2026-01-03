@@ -6,6 +6,7 @@ import pytest
 
 from fino_core.infrastructure.adapter.storage.local import LocalStorage
 from fino_core.interface.port.document_storage import StoragePort
+from fino_core.public.config.storage import LocalStorageConfig
 
 
 class TestLocalStorage:
@@ -16,7 +17,7 @@ class TestLocalStorage:
 
     @pytest.fixture
     def storage(self, temp_dir: Path) -> LocalStorage:
-        return LocalStorage(base_dir=str(temp_dir))
+        return LocalStorage(config=LocalStorageConfig(base_dir=str(temp_dir)))
 
     ########## instance check ##########
     def test_implements_document_storage_port(self, storage: LocalStorage) -> None:
