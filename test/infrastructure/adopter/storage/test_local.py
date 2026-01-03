@@ -20,8 +20,16 @@ class TestLocalStorage:
         return LocalStorage(config=LocalStorageConfig(base_dir=str(temp_dir)))
 
     ########## instance check ##########
-    def test_implements_document_storage_port(self, storage: LocalStorage) -> None:
+    def test_instance_success(self, storage: LocalStorage) -> None:
         assert isinstance(storage, StoragePort)
+
+    def test_base_dir_absolute(self) -> None:
+        storage = LocalStorage(config=LocalStorageConfig(base_dir="/absolute/path"))
+        assert storage.base_dir == Path("/absolute/path")
+
+    def test_base_dir_tilde(self) -> None:
+        storage = LocalStorage(config=LocalStorageConfig(base_dir="~/tmp"))
+        assert storage.base_dir == Path("~/tmp").expanduser().resolve()
 
     ########## exists method ##########
 
