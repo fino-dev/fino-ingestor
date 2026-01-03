@@ -22,7 +22,7 @@ packages = ["src/fino_core"]
 
 [dependency-groups]
 lint = ["ruff>=0.14.8"]
-test = ["pytest>=9.0.2"]
+test = ["pytest>=9.0.2", "moto[s3]>=5.0.0"]
 typing = ["boto3-stubs[s3]>=1.35.0"]
 dev = [
     { include-group = "lint" },
