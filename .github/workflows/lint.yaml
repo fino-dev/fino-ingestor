@@ -1,4 +1,4 @@
-name: Ruff Lint Check
+name: CI Run Ruff Lint
 
 on:
   pull_request:
