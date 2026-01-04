@@ -9,25 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     name: Run Lint
     steps:
-      - name: Check out source repository
-        uses: actions/checkout@v4
-      - name: Set up Python environment
-        uses: actions/setup-python@v5
+      - name: Check out codebase
+        uses: actions/checkout@v5
+      
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version-file: "pyproject.toml"
 
-      # キャッシュの読み込み
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      # 依存関係のインストール
-      - name: Install dependencies
-        run: |
-          uv sync --group lint
+          version: "0.9.18"
+          # キャッシュの読み込み
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --group lint -no-dev
 
       # Ruffの実行
       # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#using-ruff-to-lint-code
