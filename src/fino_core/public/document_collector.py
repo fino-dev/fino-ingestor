@@ -6,7 +6,6 @@ from fino_core.application.interactor.collect_document import CollectDocumentUse
 from fino_core.application.interactor.list_document import ListDocumentUseCase
 from fino_core.domain.entity.document import Document
 from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
-from fino_core.domain.value.market import Market, MarketEnum
 from fino_core.infrastructure.adapter.disclosure_source.edinet import (
     EdinetDocumentSearchCriteria,
 )
@@ -45,7 +44,6 @@ class DocumentCollector:
         usecase = ListDocumentUseCase(self._document_repository)
 
         criteria = EdinetDocumentSearchCriteria(
-            market=Market(enum=MarketEnum.JP),
             format_type=FormatType(enum=format_type),
             timescope=timescope,
         )
@@ -60,9 +58,22 @@ class DocumentCollector:
         }
 
     def collect_document(
-        self, criteria: EdinetDocumentSearchCriteria
+        self,
+        timescope: TimeScope,
+        format_type: Optional[FormatTypeEnum] = FormatTypeEnum.XBRL,
     ) -> dict[Literal["collected_document_list"], list[Document]]:
+        # validation
+        if format_type is None:
+            raise ValueError(
+                "format_type must not None. please specify format_type or use default value (XBRL)"
+            )
+
         usecase = CollectDocumentUseCase(self._document_repository)
+
+        criteria = EdinetDocumentSearchCriteria(
+            format_type=FormatType(enum=format_type),
+            timescope=timescope,
+        )
 
         input = CollectDocumentInput(self._disclosure_source, criteria)
 

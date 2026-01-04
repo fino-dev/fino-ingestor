@@ -23,7 +23,7 @@ class CollectDocumentUseCase:
             if available_document not in stored_document_list:
                 file = input.disclosure_source.download_document(
                     available_document.document_id,
-                    format_type=available_document.filing_format,
+                    format_type=available_document.filing_format_list,
                 )
                 self.document_repository.save(available_document, file)
                 collected_documents.append(available_document)

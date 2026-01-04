@@ -7,16 +7,6 @@ from fino_core.domain.model import ValueObject
 class MarketEnum(Enum):
     JP = "JP"
     US = "US"
-    UK = "UK"
-    DE = "DE"
-    FR = "FR"
-    IT = "IT"
-    ES = "ES"
-    CA = "CA"
-    AU = "AU"
-    NZ = "NZ"
-    SG = "SG"
-    HK = "HK"
 
 
 @dataclass(frozen=True, slots=True)

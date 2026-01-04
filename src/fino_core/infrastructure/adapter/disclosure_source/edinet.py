@@ -10,7 +10,7 @@ from fino_core.domain.value.disclosure_date import DisclosureDate
 from fino_core.domain.value.disclosure_type import DisclosureType, DisclosureTypeEnum
 from fino_core.domain.value.document_id import DocumentId
 from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
-from fino_core.domain.value.market import Market
+from fino_core.domain.value.market import Market, MarketEnum
 from fino_core.domain.value.ticker import Ticker
 from fino_core.interface.config.disclosure import EdinetConfig
 from fino_core.util import TimeScope
@@ -18,9 +18,14 @@ from fino_core.util import TimeScope
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class EdinetDocumentSearchCriteria:
-    market: Market
     format_type: FormatType
+    """書類のフォーマットタイプ"""
     timescope: TimeScope
+    """取得に使用する日付範囲"""
+    # disclosure_type: DisclosureType
+    # """開示書類の種類"""
+    # ticker: Ticker
+    # """企業ティッカー"""
 
 
 class EdinetAdapter:
@@ -30,7 +35,7 @@ class EdinetAdapter:
     def list_available_documents(
         self, criteria: EdinetDocumentSearchCriteria
     ) -> list[Document]:
-        documents: list[Document] = []
+        document_list: list[Document] = []
 
         # EDINET APIの仕様に従い日付単位で一覧を取得していく
         for target_date in criteria.timescope.iterate_by_day():
@@ -41,69 +46,88 @@ class EdinetAdapter:
                 date=target_datetime, withdocs=True
             )
 
-            target_document_list = document_list_response["results"]
+            edinet_document_list = document_list_response["results"]
 
             # EDINETの書類データをアプリ形式に変換していく
-            for target_document in target_document_list:
-                document = self._convert_to_document(target_document, criteria.market)
-                if document:
-                    documents.append(document)
+            for edinet_document in edinet_document_list:
+                document = self._convert_to_document(
+                    edinet_doc=edinet_document, market=Market(enum=MarketEnum.JP)
+                )
 
-        return documents
+                if not document:
+                    continue
+
+                document_list.append(document)
+
+        return document_list
 
     def download_document(
         self, document_id: DocumentId, format_type: FormatType
     ) -> bytes:
         # format_typeに応じてEDINET APIのtypeパラメータを決定
-        edinet_type = self._format_type_to_edinet_type(format_type)
-        return self.client.get_document(docId=document_id.value, type=edinet_type)
+        edinet_format_type = self.convert_to_edinet_format_type(format_type)
+        if edinet_format_type is None:
+            raise ValueError(f"Unsupported format type: {format_type}")
 
-    def _format_type_to_edinet_type(
+        return self.client.get_document(
+            docId=document_id.value, type=edinet_format_type
+        )
+
+    def convert_to_edinet_format_type(
         self, format_type: FormatType
-    ) -> Literal[1, 2, 3, 4, 5]:
-        """FormatTypeをEDINET APIのtypeパラメータに変換"""
-        mapping: dict[FormatTypeEnum, Literal[1, 2, 3, 4, 5]] = {
+    ) -> Literal[1, 2, 5] | None:
+        """
+        FormatTypeをEDINET APIのtypeパラメータに変換
+        1. 提出本文書及び監査報告
+        2. PDF
+        5. CSV
+        """
+        mapping: dict[FormatTypeEnum, Literal[1, 2, 5]] = {
             FormatTypeEnum.XBRL: 1,
             FormatTypeEnum.PDF: 2,
             FormatTypeEnum.CSV: 5,
         }
-        return mapping.get(format_type.enum, 1)  # デフォルトはXBRL
+        return mapping.get(format_type.enum)
 
     def _convert_to_document(
         self,
         edinet_doc: GetDocumentDocs,
         market: Market,
     ) -> Document | None:
+        """
+        EDINET APIのレスポンスの書類一覧データをDocumentに変換する
+        """
         try:
-            doc_id = DocumentId(value=edinet_doc["docID"])
-
             date_string = date.fromisoformat(edinet_doc["submitDateTime"])
-            disclosure_date = DisclosureDate(value=date_string)
 
             disclosure_type = self._map_disclosure_type(edinet_doc["docTypeCode"])
+            # 開示書類の種類が不明な場合はDocumentから除外する
             if disclosure_type is None:
                 return None
 
-            format_type = self._map_format_type(edinet_doc["formCode"])
-            if format_type is None:
+            format_type_list = self._map_format_type(
+                edinet_doc["xbrlFlag"], edinet_doc["pdfFlag"], edinet_doc["csvFlag"]
+            )
+            if format_type_list is None:
                 return None
 
-            ticker = Ticker(value=edinet_doc.get("secCode") or "")
-
             return Document(
-                document_id=doc_id,
+                document_id=DocumentId(value=edinet_doc["docID"]),
                 filing_name=edinet_doc.get("docDescription") or "",
                 market=market,
-                ticker=ticker,
+                ticker=Ticker(value=edinet_doc.get("secCode") or ""),
                 disclosure_type=disclosure_type,
                 disclosure_source_id="edinet",
-                disclosure_date=disclosure_date,
-                filing_format=format_type,
+                disclosure_date=DisclosureDate(value=date_string),
+                filing_format_list=format_type_list,
             )
         except Exception:
             return None
 
     def _map_disclosure_type(self, doc_type_code: str | None) -> DisclosureType | None:
+        """
+        EDINET APIのレスポンスの書類一覧データからDisclosureTypeにマッピングする
+        """
         if doc_type_code is None:
             return None
 
@@ -126,18 +150,23 @@ class EdinetAdapter:
 
         return DisclosureType(enum=enum)
 
-    def _map_format_type(self, form_code: str | None) -> FormatType | None:
-        if form_code is None:
-            return None
+    def _map_format_type(
+        self, xbrl_flag: str | None, pdf_flag: str | None, csv_flag: str | None
+    ) -> list[FormatType] | None:
+        """
+        EDINET APIのレスポンスの書類一覧データからFormatTypeにマッピングして一覧で返す
+        """
+        # 対応しているフォーマットをリストに追加していく
+        format_type_list: list[FormatType] = []
+        if xbrl_flag == "1":
+            format_type_list.append(FormatType(enum=FormatTypeEnum.XBRL))
+        if pdf_flag == "1":
+            format_type_list.append(FormatType(enum=FormatTypeEnum.PDF))
+        if csv_flag == "1":
+            format_type_list.append(FormatType(enum=FormatTypeEnum.CSV))
 
-        mapping = {
-            "01": FormatTypeEnum.XBRL,
-            "02": FormatTypeEnum.PDF,
-            "03": FormatTypeEnum.CSV,
-        }
+        # 上記のフォーマット以外の場合、Otherとして整理する
+        if len(format_type_list) == 0:
+            return format_type_list.append(FormatType(enum=FormatTypeEnum.OTHER))
 
-        enum = mapping.get(form_code)
-        if enum is None:
-            return FormatType(enum=FormatTypeEnum.OTHER)
-
-        return FormatType(enum=enum)
+        return format_type_list

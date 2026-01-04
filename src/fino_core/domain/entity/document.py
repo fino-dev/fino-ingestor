@@ -18,4 +18,4 @@ class Document(AggregateRoot):
     disclosure_type: DisclosureType
     disclosure_source_id: str
     disclosure_date: DisclosureDate
-    filing_format: FormatType
+    filing_format_list: list[FormatType]
