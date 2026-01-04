@@ -4,7 +4,6 @@ from typing import Literal
 
 from edinet import Edinet
 from edinet.enums.response import GetDocumentDocs
-
 from fino_core.domain.entity.document import Document
 from fino_core.domain.value.disclosure_date import DisclosureDate
 from fino_core.domain.value.disclosure_type import DisclosureType, DisclosureTypeEnum
@@ -32,9 +31,7 @@ class EdinetAdapter:
     def __init__(self, config: EdinetConfig) -> None:
         self.client = Edinet(token=config.api_key)
 
-    def list_available_documents(
-        self, criteria: EdinetDocumentSearchCriteria
-    ) -> list[Document]:
+    def list_available_documents(self, criteria: EdinetDocumentSearchCriteria) -> list[Document]:
         document_list: list[Document] = []
 
         # EDINET APIの仕様に従い日付単位で一覧を取得していく
@@ -61,21 +58,15 @@ class EdinetAdapter:
 
         return document_list
 
-    def download_document(
-        self, document_id: DocumentId, format_type: FormatType
-    ) -> bytes:
+    def download_document(self, document_id: DocumentId, format_type: FormatType) -> bytes:
         # format_typeに応じてEDINET APIのtypeパラメータを決定
         edinet_format_type = self.convert_to_edinet_format_type(format_type)
         if edinet_format_type is None:
             raise ValueError(f"Unsupported format type: {format_type}")
 
-        return self.client.get_document(
-            docId=document_id.value, type=edinet_format_type
-        )
+        return self.client.get_document(docId=document_id.value, type=edinet_format_type)
 
-    def convert_to_edinet_format_type(
-        self, format_type: FormatType
-    ) -> Literal[1, 2, 5] | None:
+    def convert_to_edinet_format_type(self, format_type: FormatType) -> Literal[1, 2, 5] | None:
         """
         FormatTypeをEDINET APIのtypeパラメータに変換
         1. 提出本文書及び監査報告
