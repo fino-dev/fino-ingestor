@@ -2,12 +2,13 @@ name: CI Run Ruff Lint
 
 on:
   pull_request:
-    paths:
-      - '**.py'
-      - '**.pyi'
-      - 'pyproject.toml'
-      - "uv.lock"
-      - "pyrightconfig.json"
+    # PR merge ruleに設定してるので指定外のpathのみのPRだと発火せずにPRをmergeできないため
+    # paths:
+    #   - '**.py'
+    #   - '**.pyi'
+    #   - 'pyproject.toml'
+    #   - "uv.lock"
+    #   - "pyrightconfig.json"
   workflow_dispatch:
 
 jobs:

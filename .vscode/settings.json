@@ -25,9 +25,9 @@
   "workbench.colorCustomizations": {
     // アクティブタブとフォーカス
     "tab.activeBackground": "#1a1a1a",
-    "tab.activeForeground": "#65aaff",
-    "tab.activeBorder": "#65aaff",
-    "tab.activeBorderTop": "#65aaff",
+    "tab.activeForeground": "#ffe065",
+    "tab.activeBorder": "#ffe065",
+    // "tab.activeBorderTop": "#ffe065",
     "tab.inactiveBackground": "#0a0a0a",
     "tab.inactiveForeground": "#6b7280",
 
@@ -78,9 +78,9 @@
     "panelTitle.inactiveForeground": "#6b7280",
 
     // タイトルバー（ヘッダー - 青）
-    "titleBar.activeBackground": "#5bb2ff",
-    "titleBar.activeForeground": "#ffffff",
-    "titleBar.border": "#65aaff",
+    // "titleBar.activeBackground": "#5bb2ff",
+    "titleBar.activeForeground": "#5bb2ff",
+    "titleBar.border": "#5bb2ff",
 
     // ボタンとインプット
     "button.background": "#ffe065",
