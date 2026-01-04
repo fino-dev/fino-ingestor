@@ -2,13 +2,14 @@ name: CI Run Tests
 
 on:
   pull_request:
-    paths:
-      - '**.py'
-      - '**.pyi'
-      - 'pyproject.toml'
-      - "uv.lock"
-      - "pyrightconfig.json"
-      - "pytest.toml"
+  # PR merge ruleに設定してるので指定外のpathのみのPRだと発火せずにPRをmergeできないため除外
+    # paths:
+    #   - '**.py'
+    #   - '**.pyi'
+    #   - 'pyproject.toml'
+    #   - "uv.lock"
+    #   - "pyrightconfig.json"
+    #   - "pytest.toml"
   workflow_dispatch:
 
 jobs:
