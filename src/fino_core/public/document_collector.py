@@ -70,7 +70,7 @@ class DocumentCollector:
             timescope=timescope,
         )
 
-        input = CollectDocumentInput(self._disclosure_source, criteria)
+        input = CollectDocumentInput(disclosure_source=self._disclosure_source, criteria=criteria)
 
         output = usecase.execute(input)
 
