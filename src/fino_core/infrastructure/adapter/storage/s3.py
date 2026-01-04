@@ -1,9 +1,8 @@
 import boto3
 from botocore.exceptions import ClientError
-from mypy_boto3_s3.client import S3Client
-
 from fino_core.interface.config.storage import S3StorageConfig
 from fino_core.interface.port.storage import StoragePort
+from mypy_boto3_s3.client import S3Client
 
 
 class S3Storage(StoragePort):
@@ -27,9 +26,7 @@ class S3Storage(StoragePort):
     def save(self, path: str, file: bytes) -> None:
         key = self._resolve_key(path)
         try:
-            response = self.s3_client.put_object(
-                Bucket=self.bucket_name, Key=key, Body=file
-            )
+            response = self.s3_client.put_object(Bucket=self.bucket_name, Key=key, Body=file)
             if "ETag" not in response:
                 raise IOError(f"Failed to save file to S3: {path}")
         except ClientError as e:

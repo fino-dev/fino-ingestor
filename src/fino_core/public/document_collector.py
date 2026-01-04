@@ -23,18 +23,15 @@ class DocumentCollector:
         disclosure_config: EdinetConfig,
         storage_config: LocalStorageConfig | S3StorageConfig,
     ) -> None:
-        self._disclosure_source = create_disclosure_source(disclosure_config)
-
         storage = create_storage(storage_config)
         self._document_repository = DocumentRepositoryImpl(storage)
+        self._disclosure_source = create_disclosure_source(disclosure_config)
 
     def list_document(
         self,
         timescope: TimeScope,
         format_type: Optional[FormatTypeEnum] = FormatTypeEnum.XBRL,
-    ) -> dict[
-        Literal["available_document_list", "stored_document_list"], list[Document]
-    ]:
+    ) -> dict[Literal["available_document_list", "stored_document_list"], list[Document]]:
         # validation
         if format_type is None:
             raise ValueError(
@@ -47,9 +44,7 @@ class DocumentCollector:
             format_type=FormatType(enum=format_type),
             timescope=timescope,
         )
-        input = ListDocumentInput(
-            disclosure_source=self._disclosure_source, criteria=criteria
-        )
+        input = ListDocumentInput(disclosure_source=self._disclosure_source, criteria=criteria)
 
         output = usecase.execute(input)
         return {
@@ -80,6 +75,3 @@ class DocumentCollector:
         output = usecase.execute(input)
 
         return {"collected_document_list": output.collected_document_list}
-
-
-# TODO: FIXME: domainが露出してるところを整理する

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 
 from fino_core.domain.model import ValueObject
@@ -12,6 +13,7 @@ class DisclosureSourceEnum(Enum):
     """EDGER"""
 
 
+@dataclass(frozen=True, slots=True)
 class DisclosureSource(ValueObject):
     enum: DisclosureSourceEnum
 
