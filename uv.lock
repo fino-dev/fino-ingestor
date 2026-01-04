@@ -239,12 +239,25 @@ wheels = [
 ]
 
 [[package]]
+name = "edinet-wrap"
+version = "0.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e5/25/a7a9197586fafde0a804e46a38d87bc46137d93683d8af372dd0df513205/edinet_wrap-0.13.tar.gz", hash = "sha256:bed646b699dac3ab86ebd73399dc277703f52a3a49e4f105fd77c448e64b69c7", size = 8241, upload-time = "2024-10-17T18:49:48.985Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/0e/a8d2a32da166423f0379137f8d11561e07674410d172d1fcd3206701d13c/edinet_wrap-0.13-py3-none-any.whl", hash = "sha256:855a9db3b060baa31dcb6a73c05e2118f7c6fbf6d4fd5a111903d01cf02f1fe1", size = 9268, upload-time = "2024-10-17T18:49:47.888Z" },
+]
+
+[[package]]
 name = "fino-core"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
     { name = "dynaconf" },
+    { name = "edinet-wrap" },
     { name = "pydantic" },
     { name = "python-dateutil" },
     { name = "requests" },
@@ -272,6 +285,7 @@ typing = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.35.0" },
     { name = "dynaconf", specifier = ">=3.2.12" },
+    { name = "edinet-wrap", specifier = ">=0.13" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "requests", specifier = ">=2.32.5" },

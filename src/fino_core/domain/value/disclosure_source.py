@@ -4,24 +4,18 @@ from enum import Enum
 from fino_core.domain.model import ValueObject
 
 
-class MarketEnum(Enum):
-    JP = "JP"
-    US = "US"
-    UK = "UK"
-    DE = "DE"
-    FR = "FR"
-    IT = "IT"
-    ES = "ES"
-    CA = "CA"
-    AU = "AU"
-    NZ = "NZ"
-    SG = "SG"
-    HK = "HK"
+class DisclosureSourceEnum(Enum):
+    """開示ソースの種類"""
+
+    EDINET = "EDINET"
+    """EDINET"""
+    EDGER = "EDGER"
+    """EDGER"""
 
 
 @dataclass(frozen=True, slots=True)
-class Market(ValueObject):
-    enum: MarketEnum
+class DisclosureSource(ValueObject):
+    enum: DisclosureSourceEnum
 
     @property
     def value(self) -> str:
@@ -33,4 +27,4 @@ class Market(ValueObject):
 
     def _validate(self) -> None:
         if not self.value:
-            raise ValueError("Market cannot be empty")
+            raise ValueError("Disclosure source cannot be empty")

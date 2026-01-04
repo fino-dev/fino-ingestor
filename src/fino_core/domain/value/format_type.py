@@ -5,10 +5,10 @@ from fino_core.domain.model import ValueObject
 
 
 class FormatTypeEnum(Enum):
-    CSV = "csv"
-    XBRL = "xbrl"
-    PDF = "pdf"
-    OTHER = "other"
+    CSV = "CSV"
+    XBRL = "XBRL"
+    PDF = "PDF"
+    OTHER = "OTHER"
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,11 +1,18 @@
-from typing import Protocol
+from typing import Generic, Protocol, TypeVar
 
-from fino_core.domain.entity.disclosure_source import DisclosureSource as DisclosureSource
 from fino_core.domain.entity.document import Document
-from fino_core.domain.repository.document import DocumentSearchCriteria
-from fino_core.domain.value.document_id import DocumentId
+
+# 各実装が独自のCriteria型を定義できるように型変数を使用
+# Protocolの引数として使われるため、反変である必要がある
+TCriteria = TypeVar("TCriteria", contravariant=True)
 
 
-class DisclosureSourcePort(Protocol):
-    def list_available_documents(self, criteria: DocumentSearchCriteria) -> list[Document]: ...
-    def download_document(self, document_id: DocumentId) -> bytes: ...
+class DisclosureSourcePort(Protocol, Generic[TCriteria]):
+    """開示ソースからドキュメントを取得するポート
+
+    各実装は、独自のCriteria型（例: EdinetDocumentSearchCriteria, EdgarDocumentSearchCriteria）
+    を定義し、それを受け取ることができます。
+    """
+
+    def list_available_documents(self, criteria: TCriteria) -> list[Document]: ...
+    def download_document(self, document: Document) -> bytes: ...

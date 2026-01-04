@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "boto3>=1.35.0",
     "dynaconf>=3.2.12",
+    "edinet-wrap>=0.13",
     "pydantic>=2.12.5",
     "python-dateutil>=2.9.0",
     "requests>=2.32.5",

@@ -78,7 +78,7 @@ alwaysApply: true
 - パーティション：検索時や、アクセス時のクエリに応じたグルーピングを行う
 - ファイル名：参照時の識別子
 - **Partition**:
-  1. market (市場の国別)
+  1. disclosure_source (開示ソース種別)
   2. ticker (企業 ID)
   3. disclosure_type (開示書類の種別)
 - **File Name**:
@@ -91,7 +91,7 @@ alwaysApply: true
 ---
 
 ```
-s3://finance-storage-bucket.com/disclosures/JP/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_xbrl.zip
+s3://finance-storage-bucket.com/disclosures/EDINET/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_xbrl.zip
 
-/Users/hogehoge/data/disclosure/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_csv.zip
+/Users/hogehoge/data/disclosure/EDGER/APPL/AMMENDED_REPORT/XXXXXXXX_2001-10-10_csv.zip
 ```
