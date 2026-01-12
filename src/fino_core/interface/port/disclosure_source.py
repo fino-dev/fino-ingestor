@@ -15,4 +15,9 @@ class DisclosureSourcePort(Protocol, Generic[TCriteria]):
     """
 
     def list_available_documents(self, criteria: TCriteria) -> list[Document]: ...
+
+    """ドキュメントを一覧取得する。"""
+
     def download_document(self, document: Document) -> bytes: ...
+
+    """ドキュメントをダウンロードする。"""

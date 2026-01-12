@@ -4,7 +4,7 @@ from fino_core.domain.value.disclosure_date import DisclosureDate
 from fino_core.domain.value.disclosure_source import DisclosureSource
 from fino_core.domain.value.disclosure_type import DisclosureType
 from fino_core.domain.value.document_id import DocumentId
-from fino_core.domain.value.format_type import FormatType
+from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
 from fino_core.domain.value.ticker import Ticker
 
 # 公開クラス
@@ -13,6 +13,9 @@ from fino_core.interface.config.storage import LocalStorageConfig, S3StorageConf
 
 # 公開config
 from fino_core.public.document_collector import DocumentCollector
+
+# 公開UTILITY
+from fino_core.util.timescope import TimeScope
 
 __all__ = [
     "DocumentCollector",
@@ -25,5 +28,7 @@ __all__ = [
     "DisclosureType",
     "DocumentId",
     "FormatType",
+    "FormatTypeEnum",
     "Ticker",
+    "TimeScope",
 ]

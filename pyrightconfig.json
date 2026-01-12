@@ -3,6 +3,7 @@
   "exclude": ["**/__pycache__", "**/node_modules"],
   "pythonVersion": "3.13",
   "typeCheckingMode": "strict",
+  "reportMissingTypeStubs": "warning",
   "reportMissingParameterType": "error",
   "reportMissingReturnType": "error",
   "reportIncompatibleMethodOverride": "error",

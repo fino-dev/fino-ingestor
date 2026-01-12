@@ -4,7 +4,6 @@ from typing import Literal
 
 from edinet import Edinet
 from edinet.enums.response import GetDocumentDocs
-
 from fino_core.domain.entity.document import Document
 from fino_core.domain.value.disclosure_date import DisclosureDate
 from fino_core.domain.value.disclosure_source import (
@@ -37,9 +36,7 @@ class EdinetAdapter:
     def __init__(self, config: EdinetConfig) -> None:
         self.client = Edinet(token=config.api_key)
 
-    def list_available_documents(
-        self, criteria: EdinetDocumentSearchCriteria
-    ) -> list[Document]:
+    def list_available_documents(self, criteria: EdinetDocumentSearchCriteria) -> list[Document]:
         document_list: list[Document] = []
 
         # EDINET APIの仕様に従い、日付単位で一覧を取得していく
@@ -66,28 +63,41 @@ class EdinetAdapter:
 
         return document_list
 
-    def download_document(
-        self, document_id: DocumentId, format_type: FormatType
-    ) -> bytes:
+    def download_document(self, document: Document) -> bytes:
+        """
+        ** EDINETでは同一docIdで複数のフォーマットが存在する可能性が、
+        設計上、document IDにformat typeをsuffixに追加しているため、
+        このメソッドではdocument IDからformat typeを取得してダウンロードする。
+        """
         # format_typeに応じてEDINET APIのtypeパラメータを決定
-        edinet_format_type = self.convert_to_edinet_format_type(format_type)
+        edinet_format_type = self.convert_to_edinet_format_type(document.filing_format)
         if edinet_format_type is None:
-            raise ValueError(f"Unsupported format type: {format_type}")
+            raise ValueError(f"Unsupported format type: {document.filing_format}")
 
-        return self.client.get_document(
-            docId=document_id.value, type=edinet_format_type
-        )
+        doc_id, _ = self._parse_edinet_doc_id(document.document_id)
+
+        return self.client.get_document(docId=doc_id, type=edinet_format_type)
 
     @classmethod
-    def _generate_edinet_document_id(
-        cls, doc_id: str, format_type: FormatType
-    ) -> DocumentId:
+    def _generate_document_id(cls, doc_id: str, format_type: FormatType) -> DocumentId:
         """
         EDINET開示書類のIDを生成する
         EDINETでは開示書類種別単位でdocIDが割り振られており、フォーマットの違いを識別していないので、format_typeをsuffixに追加する
         > "EDINET_XXXXXXXX_CSV"
         """
         return DocumentId(value=f"{cls.id.value}_{doc_id}_{format_type.value}")
+
+    @classmethod
+    def _parse_edinet_doc_id(cls, document_id: DocumentId) -> tuple[str, FormatType]:
+        """
+        EDINET開示書類のIDを解析する
+        EDINETでは開示書類種別単位でdocIDが割り振られており、フォーマットの違いを識別していないので、format_typeをsuffixに追加する
+        > "EDINET_XXXXXXXX_CSV"
+        """
+        parts = document_id.value.split("_")
+        if len(parts) != 3:
+            raise ValueError(f"Invalid document ID: {document_id.value}")
+        return parts[1], FormatType(enum=FormatTypeEnum(parts[2]))
 
     def _convert_to_document(
         self, edinet_doc: GetDocumentDocs, target_format_type: FormatType
@@ -98,7 +108,7 @@ class EdinetAdapter:
         """
         try:
             # generate document id
-            document_id = self._generate_edinet_document_id(
+            document_id = self._generate_document_id(
                 doc_id=edinet_doc["docID"], format_type=target_format_type
             )
 
@@ -128,18 +138,14 @@ class EdinetAdapter:
                 disclosure_source=DisclosureSource(enum=DisclosureSourceEnum.EDINET),
                 # EDINET APIのレスポンスの日付からパースして取得する（(YYYY-MM-DD hh:mm 形式)）
                 disclosure_date=DisclosureDate(
-                    value=datetime.strptime(
-                        edinet_doc["submitDateTime"], "%Y-%m-%d %H:%M"
-                    ).date()
+                    value=datetime.strptime(edinet_doc["submitDateTime"], "%Y-%m-%d %H:%M").date()
                 ),
                 filing_format=target_format_type,
             )
         except Exception:
             return None
 
-    def convert_to_edinet_format_type(
-        self, format_type: FormatType
-    ) -> Literal[1, 2, 5] | None:
+    def convert_to_edinet_format_type(self, format_type: FormatType) -> Literal[1, 2, 5] | None:
         """
         FormatTypeをEDINET APIのtypeパラメータに変換
         1. 提出本文書及び監査報告
