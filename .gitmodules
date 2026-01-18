@@ -1,0 +1,3 @@
+[submodule "git@github:fino-dev/fino-docs.git"]
+	path = git@github:fino-dev/fino-docs.git
+	url = ./
