@@ -36,7 +36,9 @@ class EdinetAdapter:
     def __init__(self, config: EdinetConfig) -> None:
         self.client = Edinet(token=config.api_key)
 
-    def list_available_documents(self, criteria: EdinetDocumentSearchCriteria) -> list[Document]:
+    def list_available_documents(
+        self, criteria: EdinetDocumentSearchCriteria
+    ) -> list[Document]:
         document_list: list[Document] = []
 
         # EDINET APIの仕様に従い、日付単位で一覧を取得していく
@@ -113,6 +115,7 @@ class EdinetAdapter:
             )
 
             # validate ticker
+            # FIXME: secCodeは証券コードのようなもので、tickerとは異なるため、tickerを取得する必要がある
             ticker = edinet_doc.get("secCode")
             if ticker is None:
                 return None
@@ -138,14 +141,18 @@ class EdinetAdapter:
                 disclosure_source=DisclosureSource(enum=DisclosureSourceEnum.EDINET),
                 # EDINET APIのレスポンスの日付からパースして取得する（(YYYY-MM-DD hh:mm 形式)）
                 disclosure_date=DisclosureDate(
-                    value=datetime.strptime(edinet_doc["submitDateTime"], "%Y-%m-%d %H:%M").date()
+                    value=datetime.strptime(
+                        edinet_doc["submitDateTime"], "%Y-%m-%d %H:%M"
+                    ).date()
                 ),
                 filing_format=target_format_type,
             )
         except Exception:
             return None
 
-    def convert_to_edinet_format_type(self, format_type: FormatType) -> Literal[1, 2, 5] | None:
+    def convert_to_edinet_format_type(
+        self, format_type: FormatType
+    ) -> Literal[1, 2, 5] | None:
         """
         FormatTypeをEDINET APIのtypeパラメータに変換
         1. 提出本文書及び監査報告
