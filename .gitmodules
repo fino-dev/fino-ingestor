@@ -1,0 +1,3 @@
+[submodule "fino-docs"]
+	path = fino-docs
+	url = https://github.com/fino-dev/fino-docs
