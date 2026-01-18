@@ -2,8 +2,6 @@
 alwaysApply: true
 ---
 
-# design.mdc - fino_core –
-
 ## Project Design Rules
 
 - fino_core is a **core financial data engine library**.
