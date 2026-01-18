@@ -1,20 +1,22 @@
 from typing import Literal, Optional
 
-from fino_core.application.input.collect_document import CollectDocumentInput
-from fino_core.application.input.list_document import ListDocumentInput
-from fino_core.application.interactor.collect_document import CollectDocumentUseCase
-from fino_core.application.interactor.list_document import ListDocumentUseCase
-from fino_core.domain.entity.document import Document
-from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
-from fino_core.infrastructure.adapter.disclosure_source.edinet import (
+from fino_ingestor.application.input.collect_document import CollectDocumentInput
+from fino_ingestor.application.input.list_document import ListDocumentInput
+from fino_ingestor.application.interactor.collect_document import CollectDocumentUseCase
+from fino_ingestor.application.interactor.list_document import ListDocumentUseCase
+from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.value.format_type import FormatType, FormatTypeEnum
+from fino_ingestor.infrastructure.adapter.disclosure_source.edinet import (
     EdinetDocumentSearchCriteria,
 )
-from fino_core.infrastructure.factory.disclosure_source import create_disclosure_source
-from fino_core.infrastructure.factory.storage import create_storage
-from fino_core.infrastructure.repository.document import DocumentRepositoryImpl
-from fino_core.interface.config.disclosure import EdinetConfig
-from fino_core.interface.config.storage import LocalStorageConfig, S3StorageConfig
-from fino_core.util.timescope import TimeScope
+from fino_ingestor.infrastructure.factory.disclosure_source import (
+    create_disclosure_source,
+)
+from fino_ingestor.infrastructure.factory.storage import create_storage
+from fino_ingestor.infrastructure.repository.document import DocumentRepositoryImpl
+from fino_ingestor.interface.config.disclosure import EdinetConfig
+from fino_ingestor.interface.config.storage import LocalStorageConfig, S3StorageConfig
+from fino_ingestor.util.timescope import TimeScope
 
 
 class DocumentCollector:
@@ -31,7 +33,9 @@ class DocumentCollector:
         self,
         timescope: TimeScope,
         format_type: Optional[FormatTypeEnum] = FormatTypeEnum.XBRL,
-    ) -> dict[Literal["available_document_list", "stored_document_list"], list[Document]]:
+    ) -> dict[
+        Literal["available_document_list", "stored_document_list"], list[Document]
+    ]:
         # validation
         if format_type is None:
             raise ValueError(
@@ -44,7 +48,9 @@ class DocumentCollector:
             format_type=FormatType(enum=format_type),
             timescope=timescope,
         )
-        input = ListDocumentInput(disclosure_source=self._disclosure_source, criteria=criteria)
+        input = ListDocumentInput(
+            disclosure_source=self._disclosure_source, criteria=criteria
+        )
 
         output = usecase.execute(input)
         return {
@@ -70,7 +76,9 @@ class DocumentCollector:
             timescope=timescope,
         )
 
-        input = CollectDocumentInput(disclosure_source=self._disclosure_source, criteria=criteria)
+        input = CollectDocumentInput(
+            disclosure_source=self._disclosure_source, criteria=criteria
+        )
 
         output = usecase.execute(input)
 

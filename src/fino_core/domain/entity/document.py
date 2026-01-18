@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
-from fino_core.domain.model import AggregateRoot
-from fino_core.domain.value.disclosure_date import DisclosureDate
-from fino_core.domain.value.disclosure_source import DisclosureSource
-from fino_core.domain.value.disclosure_type import DisclosureType
-from fino_core.domain.value.document_id import DocumentId
-from fino_core.domain.value.format_type import FormatType
-from fino_core.domain.value.ticker import Ticker
+from fino_ingestor.domain.model import AggregateRoot
+from fino_ingestor.domain.value.disclosure_date import DisclosureDate
+from fino_ingestor.domain.value.disclosure_source import DisclosureSource
+from fino_ingestor.domain.value.disclosure_type import DisclosureType
+from fino_ingestor.domain.value.document_id import DocumentId
+from fino_ingestor.domain.value.format_type import FormatType
+from fino_ingestor.domain.value.ticker import Ticker
 
 
 @dataclass(eq=False, slots=True)

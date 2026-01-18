@@ -1,7 +1,7 @@
-from fino_core.application.input.list_document import ListDocumentInput
-from fino_core.application.output.list_document import ListDocumentOutput
-from fino_core.domain.entity.document import Document
-from fino_core.domain.repository.document import DocumentRepository
+from fino_ingestor.application.input.list_document import ListDocumentInput
+from fino_ingestor.application.output.list_document import ListDocumentOutput
+from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.repository.document import DocumentRepository
 
 
 class ListDocumentUseCase:

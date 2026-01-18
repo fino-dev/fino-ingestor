@@ -4,9 +4,9 @@ alwaysApply: true
 
 ## Project Design Rules
 
-- fino_core is a **core financial data engine library**.
+- fino_ingestor is a **core financial data engine library**.
 - target is **enginner and personal invester**
-- fino_core will engage financial data engenniering and make the workflow creation smooth
+- fino_ingestor will engage financial data engenniering and make the workflow creation smooth
 
 ## Usecase Stories
 

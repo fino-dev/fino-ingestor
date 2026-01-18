@@ -1,7 +1,7 @@
-from fino_core.application.input.collect_document import CollectDocumentInput
-from fino_core.application.output.collect_document import CollectDocumentOutput
-from fino_core.domain.entity.document import Document
-from fino_core.domain.repository.document import DocumentRepository
+from fino_ingestor.application.input.collect_document import CollectDocumentInput
+from fino_ingestor.application.output.collect_document import CollectDocumentOutput
+from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.repository.document import DocumentRepository
 
 
 class CollectDocumentUseCase:
@@ -9,7 +9,9 @@ class CollectDocumentUseCase:
         self.document_repository = document_repository
 
     def execute(self, input: CollectDocumentInput) -> CollectDocumentOutput:
-        available_document_list = input.disclosure_source.list_available_documents(input.criteria)
+        available_document_list = input.disclosure_source.list_available_documents(
+            input.criteria
+        )
 
         stored_document_list: list[Document] = []
         for available_document in available_document_list:

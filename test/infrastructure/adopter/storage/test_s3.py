@@ -4,12 +4,11 @@ from unittest.mock import patch
 import boto3
 import pytest
 from botocore.exceptions import ClientError
+from fino_ingestor.infrastructure.adapter.storage.s3 import S3Storage
+from fino_ingestor.interface.config.storage import S3StorageConfig
+from fino_ingestor.interface.port.storage import StoragePort
 from moto import mock_aws
 from mypy_boto3_s3.client import S3Client
-
-from fino_core.infrastructure.adapter.storage.s3 import S3Storage
-from fino_core.interface.config.storage import S3StorageConfig
-from fino_core.interface.port.storage import StoragePort
 
 
 class TestS3Storage:

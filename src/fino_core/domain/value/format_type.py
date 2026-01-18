@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from fino_core.domain.model import ValueObject
+from fino_ingestor.domain.model import ValueObject
 
 
 class FormatTypeEnum(Enum):

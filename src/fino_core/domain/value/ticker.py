@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from fino_core.domain.model import ValueObject
+from fino_ingestor.domain.model import ValueObject
 
 
 @dataclass(frozen=True, slots=True)

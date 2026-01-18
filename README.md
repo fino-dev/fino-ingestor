@@ -1,8 +1,8 @@
-# fino_core
+# fino_ingestor
 
-### about fino_core
+### about fino_ingestor
 
-fino_core では FINO PROJECT 全体でコアとなる機能群をパッケージングしたものとなります。
+fino_ingestor では FINO PROJECT 全体でコアとなる機能群をパッケージングしたものとなります。
 fino を利用してデータ分析を行う際に、ユーザの環境に関わらず再利用可能な機能を提供することを目的としてます。
 そのため、ある程度の抽象化を行い、ストレージや DB などの具体的な環境にも port として提供したり、データ収集から、分析までのプロセスごとのユースケースに応じて柔軟に取り込めるように設計しております
 
@@ -29,7 +29,7 @@ FINO PROJECT の実践的なテンプレートとして、データ管理から�
 
 #### fino_cli
 
-fino_core をベースとしたデータ管理をローカル環境で構築・運用するための CLI Tool
+fino_ingestor をベースとしたデータ管理をローカル環境で構築・運用するための CLI Tool
 
 ###### [Features]
 
@@ -38,4 +38,4 @@ fino_core をベースとしたデータ管理をローカル環境で構築・�
 
 ---
 
-fino_core についての document は[こちら](./docs/table_of_content.md)
+fino_ingestor についての document は[こちら](./docs/table_of_content.md)

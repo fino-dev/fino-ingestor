@@ -4,9 +4,9 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
-from fino_core.infrastructure.adapter.storage.local import LocalStorage
-from fino_core.interface.config.storage import LocalStorageConfig
-from fino_core.interface.port.storage import StoragePort
+from fino_ingestor.infrastructure.adapter.storage.local import LocalStorage
+from fino_ingestor.interface.config.storage import LocalStorageConfig
+from fino_ingestor.interface.port.storage import StoragePort
 
 
 class TestLocalStorage:

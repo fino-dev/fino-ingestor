@@ -1,6 +1,6 @@
 from typing import Generic, Protocol, TypeVar
 
-from fino_core.domain.entity.document import Document
+from fino_ingestor.domain.entity.document import Document
 
 # 各実装が独自のCriteria型を定義できるように型変数を使用
 # Protocolの引数として使われるため、反変である必要がある

@@ -2,7 +2,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from fino_core.domain.entity.document import Document
+from fino_ingestor.domain.entity.document import Document
 
 
 # Finoのデータレイクストレージのパス構造に合わせたポリシー

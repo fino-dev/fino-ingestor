@@ -1,5 +1,5 @@
 [project]
-name = 'fino-core'
+name = 'fino-ingestor'
 version = '0.1.0'
 description = 'Fino Core'
 readme = "README.md"
@@ -18,10 +18,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/fino_core"]
+packages = ["src/fino_ingestor"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/fino_core/py.typed" = "fino_core/py.typed"
+"src/fino_ingestor/py.typed" = "fino_ingestor/py.typed"
 
 
 [dependency-groups]

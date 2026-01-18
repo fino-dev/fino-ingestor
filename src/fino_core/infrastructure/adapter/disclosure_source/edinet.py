@@ -4,18 +4,21 @@ from typing import Literal
 
 from edinet import Edinet
 from edinet.enums.response import GetDocumentDocs
-from fino_core.domain.entity.document import Document
-from fino_core.domain.value.disclosure_date import DisclosureDate
-from fino_core.domain.value.disclosure_source import (
+from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.value.disclosure_date import DisclosureDate
+from fino_ingestor.domain.value.disclosure_source import (
     DisclosureSource,
     DisclosureSourceEnum,
 )
-from fino_core.domain.value.disclosure_type import DisclosureType, DisclosureTypeEnum
-from fino_core.domain.value.document_id import DocumentId
-from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
-from fino_core.domain.value.ticker import Ticker
-from fino_core.interface.config.disclosure import EdinetConfig
-from fino_core.util import TimeScope
+from fino_ingestor.domain.value.disclosure_type import (
+    DisclosureType,
+    DisclosureTypeEnum,
+)
+from fino_ingestor.domain.value.document_id import DocumentId
+from fino_ingestor.domain.value.format_type import FormatType, FormatTypeEnum
+from fino_ingestor.domain.value.ticker import Ticker
+from fino_ingestor.interface.config.disclosure import EdinetConfig
+from fino_ingestor.util import TimeScope
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

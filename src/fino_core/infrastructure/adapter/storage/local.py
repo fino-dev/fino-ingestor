@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from fino_core.interface.config.storage import LocalStorageConfig
-from fino_core.interface.port.storage import StoragePort
+from fino_ingestor.interface.config.storage import LocalStorageConfig
+from fino_ingestor.interface.port.storage import StoragePort
 
 
 class LocalStorage(StoragePort):
