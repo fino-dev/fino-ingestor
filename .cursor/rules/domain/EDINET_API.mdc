@@ -9,6 +9,8 @@ alwaysApply: false
 - **EDINET**: 金融庁の金融商品取引法に基づく有価証券報告書等の開示書類に関する電子開示システム
 - **EDGER**: 米国SECの電子開示システム
 
+# EDINET
+
 ## 書類種別 (Disclosure Type)
 
 システムでサポートされている開示書類の種別一覧：
@@ -82,4 +84,5 @@ EDINETのAPIにおけるダウンロード `type` パラメータ：
 - **フォーマット形式定義**: `src/fino_ingestor/domain/value/format_type.py`
 - **開示ソース定義**: `src/fino_ingestor/domain/value/disclosure_source.py`
 - **EDINETアダプター**: `src/fino_ingestor/infrastructure/adapter/disclosure_source/edinet.py`
+
 

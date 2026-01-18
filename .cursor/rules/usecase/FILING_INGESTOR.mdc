@@ -1,0 +1,32 @@
+---
+alwaysApply: false
+---
+# fino-ingestor packageのingestion機能の想定 interface
+
+-　このfino-ingestor packageの最終的な利用者がどのように使用するかの想定ユースケースをまとめる
+
+## fino-ingestor.filing
+
+- fino-ingestorの主要機能である財務諸表をingestionするユースケースをまとめる
+- 基本的にpythonの他のライブラリ群と同じ形式でmethodを公開する。
+- 内部的には、保守性を維持しつつ実装する
+- この機能は複数のフローのwrapとして機能するため、個別の機能moduleも別途公開する
+
+```python
+
+from fino_ingestor.filing import ingest
+
+df = ingest(
+    source="edinet",
+    query=EDINETQuery(
+        code="7203",
+        doc_type=[DisclosureType.ANNUAL],
+        filing_format=FilingFormat.XBRL,
+        year=2023
+    ),
+    storage=S3Storage(bucket="fino-raw"),
+    normalizer="financials"
+)
+```
+
+
