@@ -1,12 +1,13 @@
+---
+alwaysApply: false
+---
+
 # Fino Ingestor - 書類種別とフォーマット形式
 
 ## 開示ソース (Disclosure Source)
 
-### 実装済み
 - **EDINET**: 金融庁の金融商品取引法に基づく有価証券報告書等の開示書類に関する電子開示システム
-
-### 未実装
-- **EDGER**: 米国SECの電子開示システム（定義のみ存在、アダプター未実装）
+- **EDGER**: 米国SECの電子開示システム
 
 ## 書類種別 (Disclosure Type)
 
