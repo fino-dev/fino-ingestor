@@ -1,0 +1,190 @@
+# SEC EDGAR 開示情報まとめ（EDINET対応版）
+
+本ドキュメントは、日本のEDINET仕様に近い形で、米国SEC
+EDGARにおける開示書類種別・フォーマット・識別子構造を整理したものです。\
+Fino / disclosure abstraction
+などの実装設計にそのまま落とし込める粒度でまとめています。
+
+------------------------------------------------------------------------
+
+## SEC EDGAR 書類種別（Disclosure Type 相当）
+
+SEC EDGARでは、EDINETの `docTypeCode`
+のような数値コードは存在せず、**Form Type（文字列）**
+によって書類種別が識別されます。
+
+主要なフォームは以下の通りです。
+
+  -------------------------------------------------------------------------------------------------------
+  Form Type         日本語名称             説明                           EDINET対応
+  ----------------- ---------------------- ------------------------------ -------------------------------
+  `10-K`            年次報告書             米国上場企業の年次開示書類     ANNUAL_REPORT
+
+  `10-K/A`          訂正年次報告書         10-Kの訂正版                   AMENDED_ANNUAL_REPORT
+
+  `10-Q`            四半期報告書           四半期ごとの財務報告           QUARTERLY_REPORT
+
+  `10-Q/A`          訂正四半期報告書       10-Qの訂正版                   AMENDED_QUARTERLY_REPORT
+
+  `8-K`             臨時報告書             重要事象の即時開示             MATERIAL_EVENT_REPORT
+
+  `8-K/A`           訂正臨時報告書         8-Kの訂正版                    AMENDED_MATERIAL_EVENT_REPORT
+
+  `20-F`            外国企業年次報告書     非米国企業の年次開示           ANNUAL_REPORT
+
+  `6-K`             外国企業臨時報告書     外国企業の臨時開示             MATERIAL_EVENT_REPORT
+
+  `DEF 14A`         委任状説明書           株主総会の議決資料             OTHER
+
+  `S-1`             有価証券登録届出書     IPO等の登録書類                OTHER
+
+  `13F-HR`          機関投資家保有報告     機関投資家ポートフォリオ開示   OTHER
+
+  `4`               インサイダー取引報告   役員の売買報告                 OTHER
+  -------------------------------------------------------------------------------------------------------
+
+> 実際には150種類以上存在するが、分析用途では上記がコア。
+
+------------------------------------------------------------------------
+
+## 訂正書類ルール
+
+EDGARでは「/A」が suffix として付くことで訂正書類を意味します。
+
+例：
+
+-   `10-K` → 正本
+-   `10-K/A` → 訂正
+-   `8-K` → 正本
+-   `8-K/A` → 訂正
+
+これはEDINETのような別docTypeCodeではなく、**命名規則で表現されている**のが特徴です。
+
+------------------------------------------------------------------------
+
+## SEC EDGAR フォーマット形式（Format Type 相当）
+
+EDGARでは提出ファイルが複数形式で提供されます。
+
+  FormatType   EDGAR実体            説明
+  ------------ -------------------- --------------------------------
+  `HTML`       .htm / .html         提出本文（メインドキュメント）
+  `TXT`        .txt                 生テキスト版
+  `XBRL`       .xml / inline XBRL   財務データ構造化形式
+  `PDF`        .pdf                 添付資料・図表など
+  `OTHER`      .jpg, .xlsx 等       その他添付資料
+
+SEC公式API（data.sec.gov）では、Inline XBRL が標準になっています。
+
+------------------------------------------------------------------------
+
+## ドキュメントID構造（EDGAR版）
+
+EDGARでは以下の識別子がユニークキーとして利用されます。
+
+### Accession Number
+
+形式:
+
+    0000950170-24-048288
+
+構成: - CIK（企業ID） - 年 - 連番
+
+### 推奨ID設計（EDINETと揃える場合）
+
+EDINETと同様に abstraction するなら：
+
+    EDGAR_{accessionNo}_{FORMTYPE}_{FORMAT}
+
+例:
+
+    EDGAR_0000950170-24-048288_10-K_XBRL
+    EDGAR_0000950170-24-048288_10-K_HTML
+
+------------------------------------------------------------------------
+
+## EDGAR APIレスポンス例
+
+SEC公式の submissions API のレスポンス例：
+
+``` json
+{
+  "accessionNumber": "0000320193-24-000010",
+  "form": "10-Q",
+  "filingDate": "2024-02-02",
+  "primaryDocument": "aapl-20231230.htm",
+  "documents": [
+    {
+      "name": "aapl-20231230.htm",
+      "type": "10-Q",
+      "description": "Quarterly report"
+    },
+    {
+      "name": "aapl-20231230.xml",
+      "type": "EX-101.INS",
+      "description": "XBRL instance document"
+    }
+  ]
+}
+```
+
+利用上は以下のようにマッピング可能：
+
+-   form → DisclosureType
+-   documents\[\].拡張子 → FormatType
+-   accessionNumber → docID
+
+------------------------------------------------------------------------
+
+## EDINETとの構造比較
+
+  観点             EDINET           SEC EDGAR
+  ---------------- ---------------- ----------------------
+  書類識別         docTypeCode      formType（文字列）
+  訂正扱い         別コード         `/A` suffix
+  ファイル形式     XBRL, PDF, CSV   HTML, XBRL, PDF, TXT
+  ドキュメントID   docID            accessionNumber
+  API設計          強く構造化       ドキュメント指向
+
+------------------------------------------------------------------------
+
+## 実装観点での設計指針
+
+Finoなどで共通 abstraction を設計するなら：
+
+``` python
+class DisclosureType(Enum):
+    ANNUAL_REPORT
+    QUARTERLY_REPORT
+    MATERIAL_EVENT_REPORT
+    OTHER
+```
+
+``` python
+def map_edgar_form_to_disclosure(form: str) -> DisclosureType:
+    if form in ["10-K", "20-F"]:
+        return DisclosureType.ANNUAL_REPORT
+    if form in ["10-Q"]:
+        return DisclosureType.QUARTERLY_REPORT
+    if form in ["8-K", "6-K"]:
+        return DisclosureType.MATERIAL_EVENT_REPORT
+    return DisclosureType.OTHER
+```
+
+------------------------------------------------------------------------
+
+## 補足
+
+-   EDGARは「巨大で完全列挙は非現実的」
+-   実務では「対象フォームを限定する」設計が必須
+-   EDINETよりも document指向・柔軟・非構造的
+
+→ abstraction層が非常に重要になる領域
+
+------------------------------------------------------------------------
+
+もし希望あれば： - EDGAR FormTypeの完全一覧JSON生成 - EDGAR → EDINET →
+Fino abstraction の統合マッピング定義 - Python /
+TypeScriptの実装テンプレ - OpenAPI Schema定義
+
+なども作れます。

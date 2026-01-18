@@ -1,0 +1,88 @@
+---
+alwaysApply: false
+---
+
+# Fino Ingestor - 書類種別とフォーマット形式
+
+## 開示ソース (Disclosure Source)
+
+- **EDINET**: 金融庁の金融商品取引法に基づく有価証券報告書等の開示書類に関する電子開示システム
+- **EDGER**: 米国SECの電子開示システム
+
+# EDINET
+
+## 書類種別 (Disclosure Type)
+
+システムでサポートされている開示書類の種別一覧：
+
+| Enum値 | 日本語名称 | 説明 |
+|--------|-----------|------|
+| `ANNUAL_REPORT` | 有価証券報告書 | 企業の事業年度終了後に提出される年次報告書 |
+| `AMENDED_ANNUAL_REPORT` | 訂正有価証券報告書 | 有価証券報告書の訂正版 |
+| `SEMI_ANNUAL_REPORT` | 半期報告書 | 事業年度の半期ごとに提出される報告書 |
+| `AMENDED_SEMI_ANNUAL_REPORT` | 訂正半期報告書 | 半期報告書の訂正版 |
+| `QUARTERLY_REPORT` | 四半期報告書 | 四半期ごとに提出される報告書 |
+| `AMENDED_QUARTERLY_REPORT` | 訂正四半期報告書 | 四半期報告書の訂正版 |
+| `MATERIAL_EVENT_REPORT` | 臨時報告書 | 重要な企業情報の変更時に提出される報告書 |
+| `AMENDED_MATERIAL_EVENT_REPORT` | 訂正臨時報告書 | 臨時報告書の訂正版 |
+| `PARENT_COMPANY_REPORT` | 親会社等状況報告書 | 親会社の状況に関する報告書 |
+| `AMENDED_PARENT_COMPANY_REPORT` | 訂正親会社等状況報告書 | 親会社等状況報告書の訂正版 |
+| `SHARE_REPURCHASE_REPORT` | 自己株券買付状況報告書 | 自社株買いの状況に関する報告書 |
+| `AMENDED_SHARE_REPURCHASE_REPORT` | 訂正自己株券買付状況報告書 | 自己株券買付状況報告書の訂正版 |
+
+## フォーマット形式 (Format Type)
+
+システムでサポートされているファイルフォーマット：
+
+| Enum値 | 説明 |
+|--------|------|
+| `CSV` | カンマ区切りテキストファイル形式 |
+| `XBRL` | eXtensible Business Reporting Language（財務報告用のXMLベース言語） |
+| `PDF` | Portable Document Format |
+| `OTHER` | 上記以外のフォーマット |
+
+## EDINET ドキュメントタイプコードマッピング
+
+EDINETのAPIレスポンスにおける `docTypeCode` と内部の `DisclosureType` のマッピング：
+
+| EDINETコード | 書類種別 | Enum値 |
+|-------------|---------|--------|
+| `120` | 有価証券報告書 | `ANNUAL_REPORT` |
+| `130` | 訂正有価証券報告書 | `AMENDED_ANNUAL_REPORT` |
+| `140` | 四半期報告書 | `QUARTERLY_REPORT` |
+| `150` | 訂正四半期報告書 | `AMENDED_QUARTERLY_REPORT` |
+| `160` | 半期報告書 | `SEMI_ANNUAL_REPORT` |
+| `170` | 訂正半期報告書 | `AMENDED_SEMI_ANNUAL_REPORT` |
+| `180` | 臨時報告書 | `MATERIAL_EVENT_REPORT` |
+| `190` | 訂正臨時報告書 | `AMENDED_MATERIAL_EVENT_REPORT` |
+| `200` | 親会社等状況報告書 | `PARENT_COMPANY_REPORT` |
+| `210` | 訂正親会社等状況報告書 | `AMENDED_PARENT_COMPANY_REPORT` |
+| `220` | 自己株券買付状況報告書 | `SHARE_REPURCHASE_REPORT` |
+| `230` | 訂正自己株券買付状況報告書 | `AMENDED_SHARE_REPURCHASE_REPORT` |
+
+## EDINETフォーマットタイプマッピング
+
+EDINETのAPIにおけるダウンロード `type` パラメータ：
+
+| FormatType | EDINETタイプ | 説明 |
+|-----------|-------------|------|
+| `XBRL` | `1` | 提出本文書及び監査報告書 |
+| `PDF` | `2` | PDF形式 |
+| `CSV` | `5` | CSV形式 |
+| `OTHER` | N/A | 対応なし |
+
+## ドキュメントID形式
+
+### EDINET
+- 形式: `EDINET_{docID}_{FORMAT_TYPE}`
+- 例: `EDINET_S100ABCD_CSV`
+- 理由: EDINETのdocIDはフォーマット種別を含まないため、サフィックスとしてフォーマットタイプを追加
+
+## 実装ファイルパス
+
+- **書類種別定義**: `src/fino_ingestor/domain/value/disclosure_type.py`
+- **フォーマット形式定義**: `src/fino_ingestor/domain/value/format_type.py`
+- **開示ソース定義**: `src/fino_ingestor/domain/value/disclosure_source.py`
+- **EDINETアダプター**: `src/fino_ingestor/infrastructure/adapter/disclosure_source/edinet.py`
+
+

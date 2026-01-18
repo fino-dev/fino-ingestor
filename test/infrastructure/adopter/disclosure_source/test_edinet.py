@@ -3,22 +3,25 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from fino_core.domain.entity.document import Document
-from fino_core.domain.value.disclosure_date import DisclosureDate
-from fino_core.domain.value.disclosure_source import (
+from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.value.disclosure_date import DisclosureDate
+from fino_ingestor.domain.value.disclosure_source import (
     DisclosureSource,
     DisclosureSourceEnum,
 )
-from fino_core.domain.value.disclosure_type import DisclosureType, DisclosureTypeEnum
-from fino_core.domain.value.document_id import DocumentId
-from fino_core.domain.value.format_type import FormatType, FormatTypeEnum
-from fino_core.domain.value.ticker import Ticker
-from fino_core.infrastructure.adapter.disclosure_source.edinet import (
+from fino_ingestor.domain.value.disclosure_type import (
+    DisclosureType,
+    DisclosureTypeEnum,
+)
+from fino_ingestor.domain.value.document_id import DocumentId
+from fino_ingestor.domain.value.format_type import FormatType, FormatTypeEnum
+from fino_ingestor.domain.value.ticker import Ticker
+from fino_ingestor.infrastructure.adapter.disclosure_source.edinet import (
     EdinetAdapter,
     EdinetDocumentSearchCriteria,
 )
-from fino_core.interface.config.disclosure import EdinetConfig
-from fino_core.util import TimeScope
+from fino_ingestor.interface.config.disclosure import EdinetConfig
+from fino_ingestor.util import TimeScope
 
 
 class TestEdinetAdapter:
@@ -104,11 +107,15 @@ class TestEdinetAdapter:
             assert documents[1].document_id.value == "EDINET_S100TEST2_XBRL"
             assert documents[1].filing_name == "四半期報告書"
             assert documents[1].ticker.value == "67890"
-            assert documents[1].disclosure_type.enum == DisclosureTypeEnum.QUARTERLY_REPORT
+            assert (
+                documents[1].disclosure_type.enum == DisclosureTypeEnum.QUARTERLY_REPORT
+            )
 
             mock_get_list.assert_called_once()
 
-    def test_list_available_documents_filters_by_format_type(self, adapter: EdinetAdapter) -> None:
+    def test_list_available_documents_filters_by_format_type(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """指定されたフォーマットタイプに対応していない書類を除外する"""
         criteria = EdinetDocumentSearchCriteria(
             format_type=FormatType(enum=FormatTypeEnum.CSV),
@@ -140,7 +147,9 @@ class TestEdinetAdapter:
             ]
         }
 
-        with patch.object(adapter.client, "get_document_list", return_value=mock_response):
+        with patch.object(
+            adapter.client, "get_document_list", return_value=mock_response
+        ):
             documents = adapter.list_available_documents(criteria)
 
             # CSV対応の書類のみが返される
@@ -182,14 +191,18 @@ class TestEdinetAdapter:
             ]
         }
 
-        with patch.object(adapter.client, "get_document_list", return_value=mock_response):
+        with patch.object(
+            adapter.client, "get_document_list", return_value=mock_response
+        ):
             documents = adapter.list_available_documents(criteria)
 
             # 既知の書類のみが返される
             assert len(documents) == 1
             assert documents[0].document_id.value == "EDINET_S100TEST1_XBRL"
 
-    def test_list_available_documents_with_multiple_days(self, adapter: EdinetAdapter) -> None:
+    def test_list_available_documents_with_multiple_days(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """複数日のデータを処理できる"""
         criteria = EdinetDocumentSearchCriteria(
             format_type=FormatType(enum=FormatTypeEnum.XBRL),
@@ -242,7 +255,9 @@ class TestEdinetAdapter:
             # 最初の2日分のドキュメントが取得される
             assert len(documents) == 2
 
-    def test_list_available_documents_with_empty_response(self, adapter: EdinetAdapter) -> None:
+    def test_list_available_documents_with_empty_response(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """空のレスポンスを処理できる"""
         criteria = EdinetDocumentSearchCriteria(
             format_type=FormatType(enum=FormatTypeEnum.XBRL),
@@ -251,12 +266,16 @@ class TestEdinetAdapter:
 
         mock_response: dict[str, list[Any]] = {"results": []}
 
-        with patch.object(adapter.client, "get_document_list", return_value=mock_response):
+        with patch.object(
+            adapter.client, "get_document_list", return_value=mock_response
+        ):
             documents = adapter.list_available_documents(criteria)
 
             assert len(documents) == 0
 
-    def test_list_available_documents_with_invalid_data(self, adapter: EdinetAdapter) -> None:
+    def test_list_available_documents_with_invalid_data(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """無効なデータを除外する"""
         criteria = EdinetDocumentSearchCriteria(
             format_type=FormatType(enum=FormatTypeEnum.XBRL),
@@ -278,7 +297,9 @@ class TestEdinetAdapter:
             ]
         }
 
-        with patch.object(adapter.client, "get_document_list", return_value=mock_response):
+        with patch.object(
+            adapter.client, "get_document_list", return_value=mock_response
+        ):
             documents = adapter.list_available_documents(criteria)
 
             # 無効なデータは除外される
@@ -437,7 +458,9 @@ class TestEdinetAdapter:
 
         assert document is None
 
-    def test_convert_to_document_handles_missing_sec_code(self, adapter: EdinetAdapter) -> None:
+    def test_convert_to_document_handles_missing_sec_code(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """secCodeが欠落している場合はNoneを返す"""
         edinet_doc = {
             "docID": "S100TEST",
@@ -477,7 +500,9 @@ class TestEdinetAdapter:
         assert document is not None
         assert document.filing_name == "UNKNOWN"
 
-    def test_convert_to_document_handles_invalid_date(self, adapter: EdinetAdapter) -> None:
+    def test_convert_to_document_handles_invalid_date(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """無効な日付の場合はNoneを返す"""
         edinet_doc = {
             "docID": "S100TEST",
@@ -536,7 +561,9 @@ class TestEdinetAdapter:
         assert amended_quarterly is not None
         assert amended_quarterly.enum == DisclosureTypeEnum.AMENDED_QUARTERLY_REPORT
 
-    def test_map_disclosure_type_all_supported_codes(self, adapter: EdinetAdapter) -> None:
+    def test_map_disclosure_type_all_supported_codes(
+        self, adapter: EdinetAdapter
+    ) -> None:
         """すべてのサポートされているコードをテスト"""
         mappings = {
             "120": DisclosureTypeEnum.ANNUAL_REPORT,
