@@ -1,10 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime, time
-from typing import Literal
+from typing import Any, Literal
 
 from edinet import Edinet
-from edinet.enums.response import GetDocumentDocs
+from edinet.enums.response import GetDocumentDocs, GetDocumentResponseWithDocs
+
 from fino_ingestor.domain.entity.document import Document
+from fino_ingestor.domain.exception.disclosure_source import (
+    DisclosureSourceApiError,
+    DisclosureSourceConnectionError,
+    DisclosureSourceInvalidResponseError,
+)
 from fino_ingestor.domain.value.disclosure_date import DisclosureDate
 from fino_ingestor.domain.value.disclosure_source import (
     DisclosureSource,
@@ -48,12 +54,37 @@ class EdinetAdapter:
         for target_date in criteria.timescope.iterate_by_day():
             target_datetime = datetime.combine(target_date, time.min)
 
+            document_list_response: GetDocumentResponseWithDocs | None = None
+
             # 書類一覧取得APIを呼び出し、書類一覧を取得する
-            document_list_response = self.client.get_document_list(
-                date=target_datetime, withdocs=True
+            try:
+                document_list_response = self.client.get_document_list(
+                    date=target_datetime, withdocs=True
+                )
+            except ConnectionError | TimeoutError as e:
+                raise DisclosureSourceConnectionError(
+                    message=f"EDINET APIへの接続に失敗しました: {str(e)}",
+                    details={
+                        "target_date": target_date.isoformat(),
+                        "api_endpoint": "get_document_list",
+                    },
+                ) from e
+            except Exception as e:
+                # その他の予期しないエラー
+                raise DisclosureSourceConnectionError(
+                    message=f"EDINET APIの呼び出し中に予期しないエラーが発生しました: {str(e)}",
+                    details={
+                        "target_date": target_date.isoformat(),
+                        "error_type": type(e).__name__,
+                    },
+                ) from e
+
+            # レスポンスの検証
+            validated_response = self._validate_document_list_response(
+                document_list_response, target_date
             )
 
-            edinet_document_list = document_list_response["results"]
+            edinet_document_list = validated_response["results"]
 
             # EDINETの書類データをアプリ形式に変換していく
             for edinet_document in edinet_document_list:
@@ -68,6 +99,68 @@ class EdinetAdapter:
 
         return document_list
 
+    def _validate_document_list_response(
+        self, response: GetDocumentResponseWithDocs | None, target_date: Any
+    ) -> dict[str, Any]:
+        """
+        EDINET APIのget_document_listレスポンスを検証する
+
+        Args:
+            response: EDINET APIからのレスポンス
+            target_date: リクエストした対象日付
+
+        Returns:
+            検証済みのレスポンス
+
+        Raises:
+            DisclosureSourceApiError: APIがエラーレスポンスを返した場合
+            DisclosureSourceInvalidResponseError: レスポンスが期待される形式でない場合
+        """
+        if response is None:
+            raise DisclosureSourceInvalidResponseError(
+                message="EDINET APIのレスポンスがNoneです",
+                details={
+                    "target_date": str(target_date),
+                },
+            )
+
+        # ステータスコードの確認
+        status_code = response.get("metadata", {}).get("status")
+        if status_code and status_code != "200":
+            # APIエラーレスポンスの場合
+            error_message = response.get("metadata", {}).get("message", "不明なエラー")
+            raise DisclosureSourceApiError(
+                message=f"EDINET APIがエラーを返しました: {error_message}",
+                status_code=int(status_code) if status_code else None,
+                details={
+                    "target_date": str(target_date),
+                    "response_metadata": response.get("metadata"),
+                },
+            )
+
+        # 必須フィールドの存在確認
+        if "results" not in response:
+            raise DisclosureSourceInvalidResponseError(
+                message="EDINET APIのレスポンスに 'results' フィールドが存在しません",
+                response_data=response,
+                details={
+                    "target_date": str(target_date),
+                    "available_keys": list(response.keys()),
+                },
+            )
+
+        # resultsがリスト形式であることを確認
+        if not isinstance(response["results"], list):
+            raise DisclosureSourceInvalidResponseError(
+                message="EDINET APIのレスポンスの 'results' フィールドがリスト形式ではありません",
+                response_data={"results_type": type(response["results"]).__name__},
+                details={
+                    "target_date": str(target_date),
+                },
+            )
+
+        return response
+
     def download_document(self, document: Document) -> bytes:
         """
         ** EDINETでは同一docIdで複数のフォーマットが存在する可能性が、
@@ -81,7 +174,26 @@ class EdinetAdapter:
 
         doc_id, _ = self._parse_edinet_doc_id(document.document_id)
 
-        return self.client.get_document(docId=doc_id, type=edinet_format_type)
+        try:
+            return self.client.get_document(docId=doc_id, type=edinet_format_type)
+        except ConnectionError as e:
+            raise DisclosureSourceConnectionError(
+                message=f"EDINET APIへの接続に失敗しました: {str(e)}",
+                details={
+                    "document_id": document.document_id.value,
+                    "doc_id": doc_id,
+                    "format_type": document.filing_format.value,
+                    "api_endpoint": "get_document",
+                },
+            ) from e
+        except Exception as e:
+            raise DisclosureSourceConnectionError(
+                message=f"書類ダウンロード中に予期しないエラーが発生しました: {str(e)}",
+                details={
+                    "document_id": document.document_id.value,
+                    "error_type": type(e).__name__,
+                },
+            ) from e
 
     @classmethod
     def _generate_document_id(cls, doc_id: str, format_type: FormatType) -> DocumentId:
